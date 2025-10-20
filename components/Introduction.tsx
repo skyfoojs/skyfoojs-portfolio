@@ -18,7 +18,7 @@ export default function Introduction() {
     <section
       ref={ref}
       id="home"
-      className="mb-28 max-w-[50rem] text-center sm:mb-0 scroll-mt-[100rem]"
+      className="mb-28 max-w-[80rem] text-center sm:mb-0 scroll-mt-[100rem]"
     >
       <div className="flex items-center justify-center">
         <div className="relative">
@@ -47,7 +47,7 @@ export default function Introduction() {
             animate={{ opacity: 1, scale: 1 }}
             transition={{
               type: "spring",
-              stiffness: 125,
+              stiffness: 50,
               delay: 0.1,
               duration: 0.7,
             }}
@@ -58,18 +58,33 @@ export default function Introduction() {
       </div>
 
       <motion.h1
-        className="mb-10 mt-4 px-4 text-xl font-medium !leading-[1.5] sm:text-4xl"
+        className="mb-10 mt-4 px-4 font-medium !leading-[1.5]"
         initial={{ opacity: 0, y: 100 }}
         animate={{ opacity: 1, y: 0 }}
+        transition={{
+          type: "spring",
+          stiffness: 50,
+          delay: 0.1,
+          duration: 0.7,
+        }}
       >
-        <span className="font-bold">Hello, I&apos;m Foo Jia Seng.</span>{" "}
-        I&apos;m a{" "}
-        <span className="font-bold">Software Engineering Student</span> @{" "}
-        <span className="font-bold">Sunway University</span> from{" "}
-        <span className="font-bold">Malaysia</span>. <br /> My focus is{" "}
-        <span className="underline">Express.js</span>,{" "}
-        <span className="underline">React.js</span>, and building scalable
-        full-stack web applications.
+        <span className="bg-gradient-to-r from-gray-700 via-red-500 to-purple-600 bg-clip-text text-transparent font-bold text-2xl sm:text-5xl animate-gradient">
+          Hello, I&apos;m Foo Jia Seng.
+        </span>{" "}
+        <br />
+        <span className="text-xl sm:text-3xl block mt-4 space-y-4">
+          <div>
+            I&apos;m a{" "}
+            <span className="font-bold">Software Engineering Student</span> @{" "}
+            <span className="font-bold">Sunway University</span> from{" "}
+            <span className="font-bold">Malaysia</span>.
+          </div>
+          <div>
+            I&apos;m focusing on <span className="font-semibold">Express.js</span>,{" "}
+            <span className="font-semibold">React.js</span>, and building scalable
+            full-stack web applications.
+          </div>
+        </span>
       </motion.h1>
 
       <motion.div
