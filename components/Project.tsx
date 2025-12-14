@@ -57,7 +57,7 @@ export default function Project({
         <Image
           src={imageUrl}
           alt="Project I worked on"
-          quality={95}
+          quality={75}
           className="sm:block max-w-[28rem] max-h-[20rem] border rounded-lg shadow-2xl sm:rounded-lg object-contain ml-auto hidden"
         />
       </Link>
