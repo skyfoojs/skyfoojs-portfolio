@@ -4,8 +4,7 @@ import { CgWorkAlt } from "react-icons/cg";
 import { LuGraduationCap } from "react-icons/lu";
 import tastybyteImg from "@/public/tastybyte.jpg";
 import medidocAiImg from "@/public/medidoc-ai.jpeg";
-import okujobseekerImg from "@/public/okujobseeker.png";
-import azoneImg from "@public/azone.png";
+import azoneImg from "@/public/azone.png";
 
 export const links = [
   {
