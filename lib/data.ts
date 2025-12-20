@@ -5,6 +5,7 @@ import { LuGraduationCap } from "react-icons/lu";
 import tastybyteImg from "@/public/tastybyte.jpg";
 import medidocAiImg from "@/public/medidoc-ai.jpeg";
 import okujobseekerImg from "@/public/okujobseeker.png";
+import azoneImg from "@public/azone.png";
 
 export const links = [
   {
@@ -62,6 +63,14 @@ export const experiencesData = [
 
 export const projectsData = [
   {
+    title: "aZone",
+    description:
+      "aZone is a web-based University Subject Enrollment Platform developed as a Software Engineering assignment for the Bachelor of Software Engineering program at Sunway University (September 2025 Intake). The system is designed to simplify and improve the subject registration process for university students.",
+    link: "https://github.com/iZ86/SEG2202SE",
+    tags: ["React", "Express.js", "Tailwind", "TypeScript", "MySQL2"],
+    imageUrl: azoneImg,
+  },
+  {
     title: "TastyByte",
     description:
       "My Final Year Project for Diploma in Information Technology @ Sunway College. This is a restaurant web-based ordering system designed to enhance order accuracy, speed up service, and improve customer satisfaction through efficient, streamlined food ordering.",
@@ -76,14 +85,6 @@ export const projectsData = [
     link: "https://github.com/skyfoojs/greataihackathon",
     tags: ["Next.js", "TypeScript", "Tailwind", "AWS Bedrock", "AWS Amplify", "AWS S3"],
     imageUrl: medidocAiImg,
-  },
-  {
-    title: "OKUJobseeker",
-    description:
-      "This is a web-based platform is designed to empower OKU (Orang Kurang Upaya) individuals by increasing access to employment opportunities and creating a safer, more inclusive hiring environment.",
-    link: "https://github.com/iZ86/OKUJobseeker",
-    tags: ["React", "Express.js", "Tailwind", "TypeScript", "MySQL2"],
-    imageUrl: okujobseekerImg,
   },
 ] as const;
 
