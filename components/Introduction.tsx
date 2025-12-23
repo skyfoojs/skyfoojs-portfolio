@@ -29,11 +29,11 @@ export default function Introduction() {
       id="home"
       className="my-28 w-full sm:mb-0 scroll-mt-28 relative z-10 justify-center"
     >
-      <div className="flex justify-between">
-        <div className="flex flex-col justify-center">
-          <div className="flex sm:justify-start justify-center items-center mb-8 sm:ml-30">
+      <div className="flex justify-center 2xl:gap-x-48 xl:gap-x-24 mt-10">
+        <div className="flex flex-col justify-center items-center">
+          <div className="flex justify-center items-center sm:mb-8">
             <motion.h1
-              className="mb-10 mt-4 px-4 font-extrabold flex flex-col text-gray-700 dark:text-gray-300"
+              className="mb-10 mt-4 px-4 font-extrabold flex flex-col text-gray-700 dark:text-gray-300 text-center sm:text-left"
               initial={{ opacity: 0, y: 100 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
@@ -42,10 +42,10 @@ export default function Introduction() {
                 Hi, I&apos;m{" "}
               </span>
               <br />
-              <span className="bg-gradient-to-r from-purple-500 dark:from-purple-300 via-pink-500 to-orange-500 bg-clip-text text-transparent animate-pulse sm:text-8xl text-5xl py-2">
+              <span className="bg-gradient-to-r from-purple-500 dark:from-purple-300 via-pink-500 to-orange-500 bg-clip-text text-transparent animate-pulse xl:text-8xl lg:text-7xl md:text-6xl sm:text-6xl text-5xl py-2">
                 Foo Jia Seng
               </span>
-              <p className="mt-6 text-lg sm:text-2xl">
+              <p className="mt-6 text-lg sm:text-xl md:text-2xl">
                 Software Engineering Student @
                 <span className="dark:text-white"> Sunway University</span>
               </p>
@@ -122,7 +122,7 @@ export default function Introduction() {
         </div>
 
         <motion.div
-          className="relative flex sm:w-[500px] flex-col items-center justify-center overflow-hidden w-0"
+          className="relative flex lg:w-[500px] flex-col items-center justify-center overflow-hidden w-0"
           initial={{ opacity: 0, y: 100 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
