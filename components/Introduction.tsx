@@ -93,7 +93,7 @@ export default function Introduction() {
 
             <a
               className="group bg-white px-7 py-3 flex items-center gap-2 rounded-full outline-none focus:scale-110 hover:scale-105 active:scale-105 transition cursor-pointer border border-black/10 dark:bg-white/10 dark:text-white dark:border-white/10 shadow-md hover:shadow-lg"
-              href="/CV.pdf"
+              href="/Foo Jia Seng_Resume.pdf"
               target="_blank"
               rel="noopener noreferrer"
             >
