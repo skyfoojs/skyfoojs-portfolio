@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { navSections, profile } from "@/data/portfolio";
+import { setScrollLocked } from "@/lib/lenis";
 
 function useActiveSection(ids: readonly string[]): string {
   const [active, setActive] = useState("");
@@ -80,6 +81,7 @@ export default function Navbar() {
     const toggle = toggleRef.current;
     const { overflow } = document.body.style;
     document.body.style.overflow = "hidden";
+    setScrollLocked(true);
     panelRef.current?.querySelector<HTMLElement>("a, button")?.focus();
 
     const onKeyDown = (e: KeyboardEvent) => {
@@ -105,6 +107,7 @@ export default function Navbar() {
 
     return () => {
       document.body.style.overflow = overflow;
+      setScrollLocked(false);
       document.removeEventListener("keydown", onKeyDown);
       if (restoreFocus.current) toggle?.focus({ preventScroll: true });
       restoreFocus.current = true;
@@ -112,16 +115,24 @@ export default function Navbar() {
   }, [open, close]);
 
   return (
-    <header
-      className={`fixed inset-x-0 top-0 z-50 transition-colors duration-300 ${
-        scrolled || open
-          ? "border-b border-line bg-background/85 backdrop-blur-xl"
-          : "border-b border-transparent"
-      }`}
-    >
-      <nav aria-label="Primary" className="container-page flex h-16 items-center justify-between">
-        <a href="#top" className="font-heading text-lg font-bold" aria-label={`${profile.name}, back to top`}>
+    <header className="fixed inset-x-0 top-0 z-50">
+      {/* After scrolling, the bar's backdrop fades in and shrinks from 64px to
+          56px; transform/opacity only, so nothing below it moves. */}
+      <div
+        aria-hidden
+        className={`absolute inset-x-0 top-0 h-16 origin-top border-b border-line bg-background/80 backdrop-blur-xl transition-[opacity,transform] duration-300 ${
+          scrolled || open ? "opacity-100" : "opacity-0"
+        } ${scrolled && !open ? "scale-y-[0.875]" : ""}`}
+      />
+      <nav
+        aria-label="Primary"
+        className={`container-page relative flex h-16 items-center justify-between transition-transform duration-300 ${
+          scrolled && !open ? "-translate-y-1" : ""
+        }`}
+      >
+        <a href="#top" className="font-heading text-lg font-bold">
           <span className="gradient-text">FJS</span>
+          <span className="sr-only">, {profile.name}, back to top</span>
         </a>
 
         <ul className="hidden items-center gap-1 lg:flex">
@@ -132,7 +143,7 @@ export default function Navbar() {
                 <a
                   href={`#${id}`}
                   aria-current={isActive ? "location" : undefined}
-                  className={`relative rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                  className={`relative isolate rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
                     isActive ? "text-fg" : "text-muted hover:text-fg"
                   }`}
                 >
@@ -140,7 +151,7 @@ export default function Navbar() {
                   {isActive && (
                     <motion.span
                       layoutId="nav-active"
-                      className="absolute inset-x-3 -bottom-0.5 h-0.5 rounded-full bg-accent"
+                      className="absolute inset-0 -z-10 rounded-lg border border-accent/30 bg-accent/10"
                       transition={{ type: "spring", stiffness: 500, damping: 40 }}
                     />
                   )}

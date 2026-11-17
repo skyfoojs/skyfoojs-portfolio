@@ -1,6 +1,9 @@
 import type { ReactNode } from "react";
 import { Calendar, MapPin } from "lucide-react";
 import Reveal from "@/components/motion/Reveal";
+import CountUp from "@/components/motion/CountUp";
+import SpotlightCard from "@/components/motion/SpotlightCard";
+import Timeline from "@/components/motion/Timeline";
 import SectionHeader from "@/components/ui/SectionHeader";
 import { experience } from "@/data/portfolio";
 
@@ -32,11 +35,17 @@ export default function Experience() {
       <div className="container-page">
         <SectionHeader id="experience-heading" eyebrow="Work history" title="Experience" />
 
-        <ol className="flex flex-col gap-6">
+        <Timeline>
+        <ol className="flex flex-col gap-6 pl-7 sm:pl-10">
           {experience.map((item) => (
-            <li key={item.slug}>
+            <li key={item.slug} className="relative">
+              <span
+                aria-hidden
+                data-timeline-dot
+                className="timeline-dot absolute -left-7 top-7 sm:-left-10 sm:top-8"
+              />
               <Reveal>
-                <article className="card p-5 sm:p-7">
+                <SpotlightCard as="article" className="card p-5 sm:p-7">
                   <header className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                     <div>
                       <h3 className="font-heading text-lg font-bold leading-snug text-fg sm:text-xl">{item.role}</h3>
@@ -63,7 +72,9 @@ export default function Experience() {
                         className="flex flex-col-reverse rounded-xl border border-line bg-surface-raised/60 px-4 py-3"
                       >
                         <dt className="mt-0.5 text-sm text-body">{stat.label}</dt>
-                        <dd className="font-heading text-2xl font-bold text-fg">{stat.value}</dd>
+                        <dd className="font-heading text-2xl font-bold text-fg">
+                          <CountUp value={stat.value} />
+                        </dd>
                       </div>
                     ))}
                   </dl>
@@ -84,11 +95,12 @@ export default function Experience() {
                       </li>
                     ))}
                   </ul>
-                </article>
+                </SpotlightCard>
               </Reveal>
             </li>
           ))}
         </ol>
+        </Timeline>
       </div>
     </section>
   );

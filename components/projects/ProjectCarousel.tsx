@@ -13,14 +13,22 @@ const SWIPE_THRESHOLD_PX = 40;
 const imageClass = "object-cover object-top";
 const sizes = "(min-width: 768px) 36rem, 100vw";
 
-/** Screenshot slider: arrow buttons, dots, swipe and ←/→ keys. No autoplay. */
+/**
+ * Screenshot carousel: slides crossfade (opacity only). Arrow buttons, dots,
+ * swipe and ←/→ keys. No autoplay. `.screenshot-media` gets the hover zoom
+ * and cursor parallax from globals.css.
+ */
 export default function ProjectCarousel({ images, title }: ProjectCarouselProps) {
   const [index, setIndex] = useState(0);
   const startX = useRef<number | null>(null);
   const count = images.length;
 
   if (count === 1) {
-    return <Image src={images[0] ?? ""} alt={`Screenshot of ${title}`} fill sizes={sizes} className={imageClass} />;
+    return (
+      <div className="screenshot-media absolute inset-0">
+        <Image src={images[0] ?? ""} alt={`Screenshot of ${title}`} fill sizes={sizes} className={imageClass} />
+      </div>
+    );
   }
 
   const go = (next: number) => setIndex((next + count) % count);
@@ -57,10 +65,7 @@ export default function ProjectCarousel({ images, title }: ProjectCarouselProps)
       onPointerCancel={() => (startX.current = null)}
       className="group/carousel absolute inset-0 touch-pan-y select-none focus-visible:outline-offset-[-3px]"
     >
-      <div
-        className="flex h-full transition-transform duration-300 ease-out"
-        style={{ transform: `translateX(-${index * 100}%)` }}
-      >
+      <div className="screenshot-media absolute inset-0">
         {images.map((src, i) => (
           <div
             key={src}
@@ -68,7 +73,9 @@ export default function ProjectCarousel({ images, title }: ProjectCarouselProps)
             aria-roledescription="slide"
             aria-label={`${i + 1} of ${count}`}
             aria-hidden={i !== index}
-            className="relative h-full w-full shrink-0"
+            className={`absolute inset-0 transition-opacity duration-500 ease-out ${
+              i === index ? "opacity-100" : "opacity-0"
+            }`}
           >
             <Image
               src={src}

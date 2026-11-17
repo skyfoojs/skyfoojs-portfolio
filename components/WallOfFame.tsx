@@ -1,6 +1,8 @@
 import Image from "next/image";
 import { ArrowRight, Award as AwardIcon, ExternalLink, Medal, Trophy } from "lucide-react";
 import Reveal from "@/components/motion/Reveal";
+import SparkleBurst from "@/components/motion/SparkleBurst";
+import TiltCard from "@/components/motion/TiltCard";
 import SectionHeader from "@/components/ui/SectionHeader";
 import { awards, projects, type Award, type AwardKind } from "@/data/portfolio";
 import { findPublicImage } from "@/lib/assets";
@@ -37,6 +39,11 @@ function AwardCard({ award }: { award: Award }) {
         big ? "border-amber-400/35 bg-gradient-to-br from-amber-400/[0.08] via-surface to-surface" : "border-amber-400/15"
       }`}
     >
+      {big && (
+        <span aria-hidden className="gold-border">
+          <span className="gold-border-spin" />
+        </span>
+      )}
       {photo ? (
         <div className={`relative w-full ${big ? "aspect-[16/9]" : "aspect-[16/7]"}`}>
           <Image
@@ -117,18 +124,23 @@ export default function WallOfFame() {
         className="absolute inset-x-0 top-0 -z-10 h-full bg-[radial-gradient(50rem_24rem_at_20%_30%,rgb(251_191_36/0.06),transparent_70%)]"
       />
       <div className="container-page">
-        <SectionHeader
-          id="awards-heading"
-          eyebrow="Hackathons & honours"
-          title="Wall of Fame"
-          tone="gold"
-        />
+        <div className="relative">
+          <SparkleBurst />
+          <SectionHeader
+            id="awards-heading"
+            eyebrow="Hackathons & honours"
+            title="Wall of Fame"
+            tone="gold"
+          />
+        </div>
 
         <ul className="grid gap-4 md:grid-cols-2 lg:grid-flow-row-dense lg:grid-cols-4 lg:gap-5">
           {awards.map((award, i) => (
             <li key={award.slug} className={layoutSpan[award.layout]}>
               <Reveal delay={i * 0.04} className="h-full">
-                <AwardCard award={award} />
+                <TiltCard foil={award.kind !== "academic"} max={award.layout === "feature" ? 4 : 6} className="h-full">
+                  <AwardCard award={award} />
+                </TiltCard>
               </Reveal>
             </li>
           ))}

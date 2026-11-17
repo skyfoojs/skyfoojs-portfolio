@@ -1,4 +1,5 @@
 import Reveal from "@/components/motion/Reveal";
+import MaskedReveal from "@/components/motion/MaskedReveal";
 
 interface SectionHeaderProps {
   id: string;
@@ -16,12 +17,18 @@ export default function SectionHeader({
   tone = "default",
 }: SectionHeaderProps) {
   return (
-    <Reveal className="mb-10 md:mb-12 max-w-2xl">
-      <p className={`eyebrow ${tone === "gold" ? "text-amber-300" : "text-accent"}`}>{eyebrow}</p>
+    <div className="mb-10 md:mb-12 max-w-2xl">
+      <Reveal>
+        <p className={`eyebrow ${tone === "gold" ? "text-amber-300" : "text-accent"}`}>{eyebrow}</p>
+      </Reveal>
       <h2 id={id} className="font-heading text-3xl md:text-4xl font-bold tracking-tight text-fg">
-        {title}
+        <MaskedReveal delay={0.05}>{title}</MaskedReveal>
       </h2>
-      {description && <p className="mt-3 text-body text-base leading-relaxed">{description}</p>}
-    </Reveal>
+      {description && (
+        <Reveal delay={0.1}>
+          <p className="mt-3 text-body text-base leading-relaxed">{description}</p>
+        </Reveal>
+      )}
+    </div>
   );
 }

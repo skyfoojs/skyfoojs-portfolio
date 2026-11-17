@@ -50,6 +50,11 @@
     border-radius: 0.375rem;
   }
 
+  /* Lenis drives scrolling when active; native smooth scroll would fight it. */
+  html.lenis, html.lenis body { height: auto; }
+  .lenis-smooth { scroll-behavior: auto !important; }
+  .lenis-stopped { overflow: clip; }
+
   @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior: auto; }
     *, *::before, *::after {
@@ -191,4 +196,329 @@
     background-image: radial-gradient(color-mix(in srgb, var(--color-accent) 18%, transparent) 1px, transparent 1px);
     background-size: 24px 24px;
   }
+}
+
+/* ───────────────────────── Motion & interaction ─────────────────────────
+ * Every effect below animates only transform, opacity or filter. Cursor
+ * effects are gated on (hover: hover) and (pointer: fine); the reduced-motion
+ * block at the end switches the decorative ones off.
+ */
+
+/* Hero name: letters sharpen from a blur (opaque the whole time). */
+.name-letter {
+  display: inline-block;
+  animation: name-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  animation-delay: calc(var(--i, 0) * 25ms + 60ms);
+}
+html[data-intro] .name-letter {
+  animation-delay: calc(var(--i, 0) * 25ms + 650ms);
+}
+@keyframes name-in {
+  from { filter: blur(10px); transform: translateY(0.22em); }
+}
+.name-gradient-letter {
+  background-image: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-2) 60%, #c084fc 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+/* Shimmer: a soft-edged window slides right while the copy inside slides
+ * left by the same amount, so the copy stays aligned with the letters. */
+.name-shimmer {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 40%;
+  overflow: hidden;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 50%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 50%, transparent);
+  transform: translateX(-100%);
+  animation: shimmer-window 7s linear 1.6s infinite;
+}
+.name-shimmer-inner {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 250%;
+  white-space: nowrap;
+  transform: translateX(40%);
+  animation: shimmer-inner 7s linear 1.6s infinite;
+}
+.name-shimmer-letter {
+  display: inline-block;
+  background-image: linear-gradient(90deg, #e0f2fe, #ffffff 50%, #f5d0fe);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  opacity: 0.85;
+}
+@keyframes shimmer-window {
+  0% { transform: translateX(-100%); }
+  30%, 100% { transform: translateX(250%); }
+}
+@keyframes shimmer-inner {
+  0% { transform: translateX(40%); }
+  30%, 100% { transform: translateX(-100%); }
+}
+
+/* Hero backdrop: static gradient for everyone, WebGL canvas fades in on top. */
+.hero-static-gradient {
+  background:
+    radial-gradient(40rem 26rem at 28% 22%, rgb(56 189 248 / 0.16), transparent 70%),
+    radial-gradient(36rem 24rem at 75% 40%, rgb(129 140 248 / 0.14), transparent 70%),
+    radial-gradient(30rem 20rem at 50% 78%, rgb(192 132 252 / 0.08), transparent 70%);
+}
+.hero-static-gradient,
+.hero-canvas {
+  -webkit-mask-image: linear-gradient(to bottom, #000 60%, transparent);
+  mask-image: linear-gradient(to bottom, #000 60%, transparent);
+}
+.hero-canvas {
+  opacity: 0;
+  transition: opacity 1.2s ease;
+}
+.hero-canvas[data-ready="true"] { opacity: 1; }
+
+/* Spotlight cards: glow blobs move with transform; layers fade with opacity. */
+.spotlight-surface,
+.spotlight-ring {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.spotlight-ring {
+  padding: 1px;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+}
+.spotlight-blob {
+  position: absolute;
+  left: -180px;
+  top: -180px;
+  width: 360px;
+  height: 360px;
+  border-radius: 50%;
+  transform: translate3d(var(--sx, -999px), var(--sy, -999px), 0);
+}
+.spotlight-surface .spotlight-blob {
+  background: radial-gradient(circle, rgb(56 189 248 / 0.09), transparent 70%);
+}
+.spotlight-ring .spotlight-blob {
+  background: radial-gradient(circle, rgb(56 189 248 / 0.95), rgb(129 140 248 / 0.5) 35%, transparent 70%);
+}
+@media (hover: hover) and (pointer: fine) {
+  .spotlight:hover > .spotlight-surface,
+  .spotlight:hover > .spotlight-ring { opacity: 1; }
+}
+
+/* Project screenshots: slight zoom + parallax against the cursor on hover. */
+.screenshot-media {
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@media (hover: hover) and (pointer: fine) {
+  .spotlight:hover .screenshot-media {
+    transform: scale(1.05) translate3d(calc(var(--px, 0) * -12px), calc(var(--py, 0) * -8px), 0);
+  }
+}
+
+/* Project Details dialog. */
+html:has(dialog[open]) { overflow: hidden; }
+.project-dialog[open] { animation: dialog-in 0.22s cubic-bezier(0.22, 1, 0.36, 1); }
+.project-dialog[open]::backdrop { animation: backdrop-in 0.22s ease; }
+@keyframes dialog-in {
+  from { opacity: 0; transform: translateY(12px) scale(0.98); }
+}
+@keyframes backdrop-in {
+  from { opacity: 0; }
+}
+
+/* Experience timeline dots. */
+.timeline-dot {
+  width: 15px;
+  height: 15px;
+  border-radius: 9999px;
+  border: 2px solid var(--color-line-strong);
+  background-color: var(--color-background);
+  transition: border-color 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+}
+.timeline-dot[data-active="true"] {
+  border-color: var(--color-accent);
+  background-color: var(--color-accent);
+  box-shadow: 0 0 0 4px rgb(56 189 248 / 0.15), 0 0 18px rgb(56 189 248 / 0.6);
+  transform: scale(1.1);
+}
+
+/* Wall of Fame feature cards: gold arc rotating around the border. The ring
+ * is a static mask; only the conic square inside it rotates. */
+.gold-border {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  padding: 1.5px;
+  overflow: hidden;
+  pointer-events: none;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+}
+.gold-border-spin {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 250%;
+  aspect-ratio: 1;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0% 58%,
+    rgb(251 191 36 / 0.85) 70%,
+    #fde68a 75%,
+    rgb(251 191 36 / 0.85) 80%,
+    transparent 92%
+  );
+  transform: translate(-50%, -50%) rotate(0deg);
+  animation: gold-spin 6s linear infinite;
+}
+@keyframes gold-spin {
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* Holographic foil on gold cards. */
+.foil-shine {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    115deg,
+    transparent 30%,
+    rgb(253 230 138 / 0.22) 42%,
+    rgb(244 114 182 / 0.16) 48%,
+    rgb(129 140 248 / 0.2) 54%,
+    rgb(56 189 248 / 0.14) 60%,
+    transparent 70%
+  );
+}
+.foil-static {
+  background: linear-gradient(120deg, transparent 35%, rgb(253 230 138 / 0.07) 50%, transparent 65%);
+}
+
+/* Tech marquee. Items use margin (not gap) so -50% is exactly one copy. */
+.marquee-row {
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee 45s linear infinite;
+}
+.marquee-track > * { margin-right: 0.75rem; }
+.marquee-track-reverse { animation-direction: reverse; }
+.marquee:hover .marquee-track { animation-play-state: paused; }
+@keyframes marquee {
+  to { transform: translate3d(-50%, 0, 0); }
+}
+
+/* Custom cursor (desktop only; added by <CustomCursor>). */
+html.has-custom-cursor,
+html.has-custom-cursor * { cursor: none !important; }
+html.has-custom-cursor :is(input, textarea, [contenteditable="true"]) { cursor: text !important; }
+.cursor-dot,
+.cursor-ring {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 100;
+  pointer-events: none;
+  will-change: transform;
+}
+.cursor-dot > span,
+.cursor-ring > span {
+  display: block;
+  border-radius: 9999px;
+  transition: opacity 0.2s ease, transform 0.25s ease, background-color 0.25s ease, border-color 0.25s ease;
+}
+.cursor-dot > span {
+  width: 6px;
+  height: 6px;
+  margin: -3px 0 0 -3px;
+  background-color: var(--color-accent);
+}
+.cursor-ring > span {
+  width: 32px;
+  height: 32px;
+  margin: -16px 0 0 -16px;
+  border: 1.5px solid rgb(56 189 248 / 0.55);
+}
+.cursor-dot[data-state="hidden"] > span,
+.cursor-ring[data-state="hidden"] > span { opacity: 0; }
+.cursor-dot[data-state="hover"] > span { transform: scale(0.5); }
+.cursor-ring[data-state="hover"] > span {
+  transform: scale(1.6);
+  border-color: rgb(56 189 248 / 0.9);
+  background-color: rgb(56 189 248 / 0.08);
+}
+.cursor-ring.is-pressed > span { transform: scale(0.85); }
+.cursor-ring.is-pressed[data-state="hover"] > span { transform: scale(1.35); }
+
+/* First-visit intro (see PageIntro.tsx). */
+.page-intro { display: none; }
+html[data-intro] .page-intro {
+  display: block;
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  pointer-events: none;
+  background-color: var(--color-background);
+  animation: intro-bg 800ms ease both;
+}
+.page-intro-logo {
+  --intro-left: 1.25rem;
+  overflow: visible;
+  transform-origin: center;
+  animation: intro-move 800ms cubic-bezier(0.65, 0, 0.35, 1) both;
+}
+@media (min-width: 640px) {
+  .page-intro-logo { --intro-left: max(2rem, calc((100vw - 72rem) / 2 + 2rem)); }
+}
+.page-intro-logo text {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 18px;
+  fill: url(#intro-gradient);
+  stroke: url(#intro-gradient);
+  stroke-width: 0.6;
+  stroke-dasharray: 90;
+  animation: intro-draw 800ms ease both;
+}
+@keyframes intro-bg {
+  0%, 55% { opacity: 1; }
+  100% { opacity: 0; visibility: hidden; }
+}
+@keyframes intro-move {
+  0%, 45% { transform: translate(calc(50vw - var(--intro-left) - 20px), calc(50vh - 32px)) scale(3); }
+  100% { transform: none; }
+}
+@keyframes intro-draw {
+  0% { stroke-dashoffset: 90; fill-opacity: 0; }
+  40% { stroke-dashoffset: 0; fill-opacity: 0; }
+  55%, 100% { stroke-dashoffset: 0; fill-opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .name-shimmer,
+  .page-intro { display: none !important; }
+  .marquee-track { animation: none !important; }
+  .screenshot-media { transform: none !important; }
 }

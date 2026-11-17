@@ -374,7 +374,7 @@ export const projects: readonly Project[] = [
     imageName: "april",
     title: "APRIL Group: Shipping Document Verification",
     tagline: "Checks shipping documents against each other so ops staff don't have to.",
-    context: "Averis x Monash Hackathon 2026 · team of 5",
+    context: "Averis x Monash Hackathon 2026",
     bullets: [
       "Watches a shipping-ops inbox and classifies every email into 5 categories (document comparison, new SI request, invoice query, general, spam)",
       "Extracts 7 key fields from the Shipping Instruction and draft Bill of Lading (PDF / DOCX / DOC / XLSX), compares them and names every mismatch side by side",

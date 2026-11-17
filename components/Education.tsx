@@ -1,5 +1,6 @@
 import { GraduationCap } from "lucide-react";
 import Reveal from "@/components/motion/Reveal";
+import SpotlightCard from "@/components/motion/SpotlightCard";
 import SectionHeader from "@/components/ui/SectionHeader";
 import { education } from "@/data/portfolio";
 
@@ -13,7 +14,7 @@ export default function Education() {
           {education.map((item, i) => (
             <li key={item.slug}>
               <Reveal delay={i * 0.04} className="h-full">
-                <article className="card flex h-full items-start gap-4 p-5 sm:p-6">
+                <SpotlightCard as="article" className="card flex h-full items-start gap-4 p-5 sm:p-6">
                   <span
                     aria-hidden
                     className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-accent/30 bg-accent/10 text-accent"
@@ -27,7 +28,7 @@ export default function Education() {
                       {item.period} · {item.location}
                     </p>
                   </div>
-                </article>
+                </SpotlightCard>
               </Reveal>
             </li>
           ))}

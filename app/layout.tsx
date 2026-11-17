@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Space_Grotesk } from "next/font/google";
 import MotionProvider from "@/components/motion/MotionProvider";
+import GlobalEffects from "@/components/motion/GlobalEffects";
+import PageIntro from "@/components/motion/PageIntro";
 import { profile, seo } from "@/data/portfolio";
 import "./globals.css";
 
@@ -46,8 +48,10 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${inter.variable} ${spaceGrotesk.variable}`}>
+    // suppressHydrationWarning: PageIntro's inline script may add data-intro before hydration.
+    <html lang="en" className={`${inter.variable} ${spaceGrotesk.variable}`} suppressHydrationWarning>
       <body className="antialiased">
+        <PageIntro />
         <a
           href="#main"
           className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] focus:rounded-lg focus:bg-accent focus:px-4 focus:py-2 focus:font-semibold focus:text-background"
@@ -58,7 +62,10 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           <div className="absolute inset-0 bg-page-glow" />
           <div className="absolute inset-0 bg-noise opacity-[0.035] mix-blend-overlay" />
         </div>
-        <MotionProvider>{children}</MotionProvider>
+        <MotionProvider>
+          <GlobalEffects />
+          {children}
+        </MotionProvider>
       </body>
     </html>
   );

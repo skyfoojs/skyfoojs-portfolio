@@ -45,12 +45,13 @@ export default function About() {
               {profile.facts.map(({ label, value }, i) => {
                 const Icon = factIcons[i % factIcons.length] ?? MapPin;
                 return (
-                  <div key={label} className="card flex items-start gap-3 p-4">
-                    <Icon size={18} aria-hidden className="mt-0.5 shrink-0 text-accent" />
-                    <div>
-                      <dt className="text-xs font-semibold uppercase tracking-wider text-muted">{label}</dt>
-                      <dd className="mt-0.5 text-sm font-medium text-fg">{value}</dd>
-                    </div>
+                  // dt/dd must be direct children of the group <div>, so the icon sits inside <dt>.
+                  <div key={label} className="card p-4">
+                    <dt className="flex items-center gap-3 text-xs font-semibold uppercase tracking-wider text-muted">
+                      <Icon size={18} aria-hidden className="shrink-0 text-accent" />
+                      {label}
+                    </dt>
+                    <dd className="mt-0.5 pl-[30px] text-sm font-medium text-fg">{value}</dd>
                   </div>
                 );
               })}
