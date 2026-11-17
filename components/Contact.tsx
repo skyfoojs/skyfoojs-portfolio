@@ -1,228 +1,219 @@
 "use client";
 
-import { useState } from "react";
-import { motion } from "framer-motion";
-import {
-  Mail,
-  Phone,
-  Github,
-  Linkedin,
-  Send,
-  CheckCircle,
-  MapPin,
-} from "lucide-react";
+import { useState, type ChangeEvent, type FormEvent, type ReactNode } from "react";
+import { CheckCircle2, Loader2, Mail, MapPin, Phone, Send } from "lucide-react";
+import { FaGithub, FaLinkedin } from "react-icons/fa6";
+import Reveal from "@/components/motion/Reveal";
+import SectionHeader from "@/components/ui/SectionHeader";
+import { profile } from "@/data/portfolio";
+import { CONTACT_LIMITS, validateContact, type ContactErrors, type ContactInput } from "@/lib/contact";
 
-const contactInfo = [
-  {
-    icon: Mail,
-    label: "Email",
-    value: "skyfoojs@gmail.com",
-    href: "mailto:skyfoojs@gmail.com",
-  },
-  {
-    icon: Phone,
-    label: "Phone",
-    value: "+60 17-268 1225",
-    href: "tel:+60172681225",
-  },
-  {
-    icon: Github,
-    label: "GitHub",
-    value: "github.com/skyfoojs",
-    href: "https://github.com/skyfoojs",
-  },
-  {
-    icon: Linkedin,
-    label: "LinkedIn",
-    value: "linkedin.com/in/foo-jia-seng",
-    href: "https://linkedin.com/in/foo-jia-seng",
-  },
-  {
-    icon: MapPin,
-    label: "Location",
-    value: "Selangor, Malaysia",
-    href: "https://maps.app.goo.gl/tk2SpNd8mUDbRkyeA",
-  },
+interface ContactRow {
+  icon: ReactNode;
+  label: string;
+  value: string;
+  href: string;
+}
+
+const github = profile.socials.find((s) => s.kind === "github");
+const linkedin = profile.socials.find((s) => s.kind === "linkedin");
+
+const rows: ContactRow[] = [
+  { icon: <Mail size={16} aria-hidden />, label: "Email", value: profile.email, href: `mailto:${profile.email}` },
+  { icon: <Phone size={16} aria-hidden />, label: "Phone", value: profile.phone.display, href: profile.phone.href },
+  ...(github
+    ? [{ icon: <FaGithub size={16} aria-hidden />, label: "GitHub", value: github.href.replace(/^https?:\/\/(www\.)?/, ""), href: github.href }]
+    : []),
+  ...(linkedin
+    ? [{ icon: <FaLinkedin size={16} aria-hidden />, label: "LinkedIn", value: linkedin.href.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, ""), href: linkedin.href }]
+    : []),
+  { icon: <MapPin size={16} aria-hidden />, label: "Location", value: profile.location, href: profile.locationMapUrl },
 ];
 
+type Status = { state: "idle" } | { state: "sending" } | { state: "sent" } | { state: "error"; message: string };
+
+const emptyForm: ContactInput = { name: "", email: "", message: "" };
+
+const inputClass =
+  "w-full rounded-xl border bg-background/60 px-4 py-3 text-[0.9375rem] text-fg placeholder:text-muted/80 transition-colors focus:border-accent focus:outline-none focus-visible:outline-none focus:ring-2 focus:ring-accent/30";
+
 export default function Contact() {
-  const [form, setForm] = useState({ name: "", email: "", message: "" });
-  const [status, setStatus] = useState<"idle" | "sending" | "sent">("idle");
+  const [form, setForm] = useState<ContactInput>(emptyForm);
+  const [honeypot, setHoneypot] = useState("");
+  const [errors, setErrors] = useState<ContactErrors>({});
+  const [status, setStatus] = useState<Status>({ state: "idle" });
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  const onChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const field = e.target.name as keyof ContactInput;
+    setForm((f) => ({ ...f, [field]: e.target.value }));
+    if (errors[field]) setErrors((errs) => ({ ...errs, [field]: undefined }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setStatus("sending");
-    // Simulate form submission
-    await new Promise((res) => setTimeout(res, 1500));
-    setStatus("sent");
-    setForm({ name: "", email: "", message: "" });
-    setTimeout(() => setStatus("idle"), 4000);
+    const found = validateContact(form);
+    setErrors(found);
+    if (Object.keys(found).length > 0) return;
+
+    setStatus({ state: "sending" });
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...form, company: honeypot }),
+      });
+      const data: { error?: string; errors?: ContactErrors } = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        if (data.errors) setErrors(data.errors);
+        setStatus({ state: "error", message: data.error ?? "Your message couldn't be sent." });
+        return;
+      }
+      setForm(emptyForm);
+      setStatus({ state: "sent" });
+    } catch {
+      setStatus({ state: "error", message: "Network error. Please try again or email me directly." });
+    }
   };
+
+  const field = (name: keyof ContactInput) => ({
+    id: `contact-${name}`,
+    name,
+    value: form[name],
+    onChange,
+    "aria-invalid": errors[name] ? true : undefined,
+    "aria-describedby": errors[name] ? `contact-${name}-error` : undefined,
+    className: `${inputClass} ${errors[name] ? "border-rose-400/70" : "border-line-strong"}`,
+  });
+
+  const fieldError = (name: keyof ContactInput) =>
+    errors[name] && (
+      <p id={`contact-${name}-error`} className="text-sm text-rose-300">
+        {errors[name]}
+      </p>
+    );
 
   return (
-    <section id="contact" className="py-24">
-      <div className="section-container">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="text-center mb-16"
-        >
-          <span className="section-label">Get in touch</span>
-          <h2 className="section-heading">Contact Me</h2>
-          <div className="w-16 h-0.5 bg-accent mx-auto rounded-full mb-4" />
-          <p className="text-muted text-sm max-w-md mx-auto">
-            Open to internships, full-time roles, and exciting projects. Let&apos;s
-            build something great together.
-          </p>
-        </motion.div>
+    <section id="contact" aria-labelledby="contact-heading" className="section">
+      <div className="container-page">
+        <SectionHeader
+          id="contact-heading"
+          eyebrow="Get in touch"
+          title="Contact me"
+          description="Have a role, a project or a question? Send a message and it goes straight to my inbox."
+        />
 
-        <div className="grid lg:grid-cols-2 gap-12 max-w-5xl mx-auto">
-          {/* Contact Info */}
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="flex flex-col gap-4"
-          >
-            <h3 className="font-heading font-semibold text-slate-100 mb-2">
-              Let&apos;s work together
-            </h3>
-            <p className="text-muted text-sm leading-relaxed mb-4">
-              Whether you have a project in mind, a role to fill, or just
-              want to connect — my inbox is always open.
-            </p>
+        <div className="grid gap-8 lg:grid-cols-[1fr_1.3fr] lg:gap-10">
+          <Reveal>
+            <ul className="flex flex-col gap-3">
+              {rows.map((row) => {
+                const external = row.href.startsWith("http");
+                return (
+                  <li key={row.label}>
+                    <a
+                      href={row.href}
+                      target={external ? "_blank" : undefined}
+                      rel={external ? "noopener noreferrer" : undefined}
+                      className="card card-interactive flex items-center gap-4 p-4"
+                    >
+                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-accent/10 text-accent">
+                        {row.icon}
+                      </span>
+                      <span className="min-w-0">
+                        <span className="block text-xs font-semibold uppercase tracking-wider text-muted">{row.label}</span>
+                        <span className="block truncate text-[0.9375rem] font-medium text-fg">{row.value}</span>
+                      </span>
+                    </a>
+                  </li>
+                );
+              })}
+            </ul>
+          </Reveal>
 
-            {contactInfo.map(({ icon: Icon, label, value, href }) => (
-              <motion.a
-                key={label}
-                href={href}
-                target={href.startsWith("http") ? "_blank" : undefined}
-                rel={href.startsWith("http") ? "noopener noreferrer" : undefined}
-                whileHover={{ x: 4 }}
-                className="flex items-center gap-4 p-4 card-base glow-border group transition-all duration-200 hover:bg-card/80"
-              >
-                <div className="p-2.5 rounded-lg bg-accent/10 group-hover:bg-accent/20 transition-colors">
-                  <Icon size={16} className="text-accent" />
+          <Reveal delay={0.05}>
+            <form onSubmit={onSubmit} noValidate className="card relative flex flex-col gap-5 p-5 sm:p-7">
+              <div className="grid gap-5 sm:grid-cols-2">
+                <div className="flex flex-col gap-1.5">
+                  <label htmlFor="contact-name" className="text-sm font-medium text-fg">
+                    Name
+                  </label>
+                  <input {...field("name")} type="text" autoComplete="name" maxLength={CONTACT_LIMITS.name} required />
+                  {fieldError("name")}
                 </div>
-                <div>
-                  <p className="text-xs text-muted uppercase tracking-wider font-medium">
-                    {label}
-                  </p>
-                  <p className="text-sm text-slate-200 group-hover:text-accent transition-colors font-medium">
-                    {value}
-                  </p>
+                <div className="flex flex-col gap-1.5">
+                  <label htmlFor="contact-email" className="text-sm font-medium text-fg">
+                    Email
+                  </label>
+                  <input
+                    {...field("email")}
+                    type="email"
+                    autoComplete="email"
+                    maxLength={CONTACT_LIMITS.email}
+                    placeholder="you@example.com"
+                    required
+                  />
+                  {fieldError("email")}
                 </div>
-              </motion.a>
-            ))}
-          </motion.div>
+              </div>
 
-          {/* Contact Form */}
-          <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-          >
-            <form
-              onSubmit={handleSubmit}
-              className="card-base p-8 flex flex-col gap-5"
-            >
               <div className="flex flex-col gap-1.5">
-                <label
-                  htmlFor="name"
-                  className="text-xs font-semibold text-muted uppercase tracking-wider"
-                >
-                  Name
-                </label>
-                <input
-                  id="name"
-                  name="name"
-                  type="text"
-                  value={form.name}
-                  onChange={handleChange}
-                  required
-                  placeholder="Your name"
-                  className="bg-primary/50 border border-card-border rounded-xl px-4 py-3 text-sm text-slate-100 placeholder:text-muted focus:outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/30 transition-all"
-                />
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <label
-                  htmlFor="email"
-                  className="text-xs font-semibold text-muted uppercase tracking-wider"
-                >
-                  Email
-                </label>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  value={form.email}
-                  onChange={handleChange}
-                  required
-                  placeholder="your@email.com"
-                  className="bg-primary/50 border border-card-border rounded-xl px-4 py-3 text-sm text-slate-100 placeholder:text-muted focus:outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/30 transition-all"
-                />
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <label
-                  htmlFor="message"
-                  className="text-xs font-semibold text-muted uppercase tracking-wider"
-                >
+                <label htmlFor="contact-message" className="text-sm font-medium text-fg">
                   Message
                 </label>
                 <textarea
-                  id="message"
-                  name="message"
-                  value={form.message}
-                  onChange={handleChange}
+                  {...field("message")}
+                  rows={6}
+                  maxLength={CONTACT_LIMITS.message}
+                  placeholder="Tell me about the role or project…"
                   required
-                  rows={5}
-                  placeholder="Tell me about your project or opportunity..."
-                  className="bg-primary/50 border border-card-border rounded-xl px-4 py-3 text-sm text-slate-100 placeholder:text-muted focus:outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/30 transition-all resize-none"
+                  className={`${field("message").className} resize-y`}
+                />
+                {fieldError("message")}
+              </div>
+
+              {/* Honeypot for bots; hidden from people and assistive tech. */}
+              <div aria-hidden className="absolute -left-[9999px] h-px w-px overflow-hidden">
+                <label htmlFor="contact-company">Company</label>
+                <input
+                  id="contact-company"
+                  name="company"
+                  type="text"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  value={honeypot}
+                  onChange={(e) => setHoneypot(e.target.value)}
                 />
               </div>
 
-              <motion.button
-                type="submit"
-                disabled={status !== "idle"}
-                whileHover={{ scale: status === "idle" ? 1.02 : 1 }}
-                whileTap={{ scale: status === "idle" ? 0.98 : 1 }}
-                className={`flex items-center justify-center gap-2 py-3 px-6 rounded-xl font-semibold text-sm transition-all duration-300 ${
-                  status === "sent"
-                    ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
-                    : "btn-primary w-full"
-                }`}
-              >
-                {status === "idle" && (
-                  <>
-                    Send Message
-                    <Send size={15} />
-                  </>
-                )}
-                {status === "sending" && (
-                  <>
-                    <div className="w-4 h-4 border-2 border-background/40 border-t-background rounded-full animate-spin" />
-                    Sending...
-                  </>
-                )}
-                {status === "sent" && (
-                  <>
-                    <CheckCircle size={15} />
-                    Message Sent!
-                  </>
-                )}
-              </motion.button>
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <button type="submit" disabled={status.state === "sending"} className="btn btn-primary disabled:cursor-wait disabled:opacity-80">
+                  {status.state === "sending" ? (
+                    <>
+                      <Loader2 size={16} aria-hidden className="animate-spin" /> Sending…
+                    </>
+                  ) : (
+                    <>
+                      Send message <Send size={16} aria-hidden />
+                    </>
+                  )}
+                </button>
+                <p role="status" aria-live="polite" className="text-sm">
+                  {status.state === "sent" && (
+                    <span className="inline-flex items-center gap-1.5 text-emerald-300">
+                      <CheckCircle2 size={16} aria-hidden /> Thanks! Your message is on its way.
+                    </span>
+                  )}
+                  {status.state === "error" && (
+                    <span className="text-rose-300">
+                      {status.message}{" "}
+                      <a href={`mailto:${profile.email}`} className="underline underline-offset-2 hover:text-rose-200">
+                        {profile.email}
+                      </a>
+                    </span>
+                  )}
+                </p>
+              </div>
             </form>
-          </motion.div>
+          </Reveal>
         </div>
       </div>
     </section>

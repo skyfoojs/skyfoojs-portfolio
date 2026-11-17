@@ -1,5 +1,7 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, Space_Grotesk } from "next/font/google";
+import MotionProvider from "@/components/motion/MotionProvider";
+import { profile, seo } from "@/data/portfolio";
 import "./globals.css";
 
 const inter = Inter({
@@ -15,62 +17,48 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: "Foo Jia Seng | Software Engineer & Backend Developer",
-  description:
-    "Personal portfolio of Foo Jia Seng — Software Engineering student from Malaysia specializing in backend development with Node.js, TypeScript, and modern cloud technologies.",
-  keywords: [
-    "Foo Jia Seng",
-    "Software Engineer",
-    "Backend Developer",
-    "Node.js",
-    "TypeScript",
-    "React",
-    "Next.js",
-    "Malaysia",
-    "Portfolio",
-  ],
-  authors: [{ name: "Foo Jia Seng", url: "https://github.com/skyfoojs" }],
-  creator: "Foo Jia Seng",
+  metadataBase: new URL(profile.siteUrl),
+  title: seo.title,
+  description: seo.description,
+  keywords: [...seo.keywords],
+  authors: [{ name: profile.name, url: profile.siteUrl }],
+  creator: profile.name,
+  alternates: { canonical: "/" },
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://foojiaseng.dev",
-    title: "Foo Jia Seng | Software Engineer & Backend Developer",
-    description:
-      "Software Engineering student from Malaysia building scalable web applications with Node.js, TypeScript, and modern cloud technologies.",
-    siteName: "Foo Jia Seng Portfolio",
-    images: [
-      {
-        url: "https://avatars.githubusercontent.com/u/skyfoojs",
-        width: 1200,
-        height: 630,
-        alt: "Foo Jia Seng Portfolio",
-      },
-    ],
+    url: "/",
+    siteName: profile.name,
+    title: seo.title,
+    description: seo.description,
   },
   twitter: {
     card: "summary_large_image",
-    title: "Foo Jia Seng | Software Engineer & Backend Developer",
-    description:
-      "Software Engineering student from Malaysia building scalable web applications.",
+    title: seo.title,
+    description: seo.description,
   },
-  robots: {
-    index: true,
-    follow: true,
-  },
+  robots: { index: true, follow: true },
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export const viewport: Viewport = {
+  themeColor: "#020617",
+};
+
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body
-        className={`${inter.variable} ${spaceGrotesk.variable} antialiased`}
-      >
-        {children}
+    <html lang="en" className={`${inter.variable} ${spaceGrotesk.variable}`}>
+      <body className="antialiased">
+        <a
+          href="#main"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] focus:rounded-lg focus:bg-accent focus:px-4 focus:py-2 focus:font-semibold focus:text-background"
+        >
+          Skip to content
+        </a>
+        <div aria-hidden className="pointer-events-none fixed inset-0 -z-10">
+          <div className="absolute inset-0 bg-page-glow" />
+          <div className="absolute inset-0 bg-noise opacity-[0.035] mix-blend-overlay" />
+        </div>
+        <MotionProvider>{children}</MotionProvider>
       </body>
     </html>
   );

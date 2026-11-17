@@ -1,110 +1,94 @@
-"use client";
+import type { ReactNode } from "react";
+import { Calendar, MapPin } from "lucide-react";
+import Reveal from "@/components/motion/Reveal";
+import SectionHeader from "@/components/ui/SectionHeader";
+import { experience } from "@/data/portfolio";
 
-import { motion } from "framer-motion";
-import { Building2, CheckCircle2 } from "lucide-react";
+/** Wraps any stat value that appears in the bullet text in <strong>. */
+function emphasise(text: string, values: readonly string[]): ReactNode[] {
+  const needles = values
+    // Prefer the full value ("9.3M rows"), fall back to the number ("40+").
+    .map((v) => (text.includes(v) ? v : (v.split(" ")[0] ?? v)))
+    .filter((v) => text.includes(v))
+    .sort((a, b) => b.length - a.length);
+  if (needles.length === 0) return [text];
 
-const experiences = [
-  {
-    company: "Continental",
-    role: "Web Backend Node.js Developer Intern",
-    period: "April 2025 - July 2025",
-    type: "Internship",
-    responsibilities: [
-      "Built REST APIs using Node.js + Express for internal tooling",
-      "Designed MongoDB schemas for optimal query performance",
-      "Implemented JWT authentication and middleware security",
-      "Docker containerization for consistent dev environments",
-      "Developed cron-based desk auto-release automation system",
-    ],
-    color: "border-accent/30",
-    dotColor: "bg-accent",
-    badge: "bg-accent/10 text-accent border-accent/20",
-  },
-];
+  const escaped = needles.map((n) => n.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+  const pattern = new RegExp(`(${escaped.join("|")})`, "g");
+  return text.split(pattern).map((part, i) =>
+    needles.includes(part) ? (
+      <strong key={i} className="font-semibold text-fg">
+        {part}
+      </strong>
+    ) : (
+      part
+    ),
+  );
+}
 
 export default function Experience() {
   return (
-    <section id="experience" className="py-24 relative">
-      <div className="absolute inset-0 bg-primary/20 -skew-y-1 -z-10" />
-      <div className="section-container">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="text-center mb-16"
-        >
-          <span className="section-label">Work history</span>
-          <h2 className="section-heading">Experience</h2>
-          <div className="w-16 h-0.5 bg-accent mx-auto rounded-full" />
-        </motion.div>
+    <section id="experience" aria-labelledby="experience-heading" className="section">
+      <div className="container-page">
+        <SectionHeader id="experience-heading" eyebrow="Work history" title="Experience" />
 
-        <div className="max-w-3xl mx-auto">
-          {experiences.map((exp, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: i * 0.1 }}
-              className="relative flex gap-6"
-            >
-              {/* Timeline dot */}
-              <div className="flex flex-col items-center pt-1.5">
-                <div
-                  className={`w-3 h-3 rounded-full ${exp.dotColor} shadow-[0_0_12px_rgba(56,189,248,0.4)] flex-shrink-0`}
-                />
-                <div className="w-px flex-1 bg-card-border mt-2" />
-              </div>
-
-              {/* Content */}
-              <div className={`card-base border-l-2 ${exp.color} bg-card/60 p-6 mb-8 flex-1 hover:bg-card transition-colors`}>
-                <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-accent/10">
-                      <Building2 size={18} className="text-accent" />
-                    </div>
+        <ol className="flex flex-col gap-6">
+          {experience.map((item) => (
+            <li key={item.slug}>
+              <Reveal>
+                <article className="card p-5 sm:p-7">
+                  <header className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                     <div>
-                      <h3 className="font-heading font-bold text-slate-100 text-lg">
-                        {exp.company}
-                      </h3>
-                      <p className="text-sm text-muted">{exp.role}</p>
+                      <h3 className="font-heading text-lg font-bold leading-snug text-fg sm:text-xl">{item.role}</h3>
+                      <p className="mt-0.5 font-medium text-accent">{item.company}</p>
+                      {item.team && <p className="mt-1 text-sm text-muted">{item.team}</p>}
                     </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span
-                      className={`text-xs px-3 py-1.5 rounded-full border font-medium ${exp.badge}`}
-                    >
-                      {exp.type}
-                    </span>
-                    <span className="text-xs text-muted bg-primary/50 px-3 py-1.5 rounded-full border border-card-border">
-                      {exp.period}
-                    </span>
-                  </div>
-                </div>
+                    <div className="flex flex-col gap-1.5 text-sm text-body sm:items-end sm:text-right">
+                      <span className="inline-flex items-center gap-1.5 font-medium text-fg">
+                        <Calendar size={14} aria-hidden className="text-muted" />
+                        {item.period}
+                      </span>
+                      <span className="inline-flex items-center gap-1.5">
+                        <MapPin size={14} aria-hidden className="text-muted" />
+                        {item.location} · {item.workMode}
+                      </span>
+                      <span className="chip w-fit">{item.employmentType}</span>
+                    </div>
+                  </header>
 
-                <ul className="flex flex-col gap-2.5">
-                  {exp.responsibilities.map((resp, j) => (
-                    <motion.li
-                      key={j}
-                      initial={{ opacity: 0, x: 10 }}
-                      whileInView={{ opacity: 1, x: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ delay: i * 0.1 + j * 0.05, duration: 0.3 }}
-                      className="flex items-start gap-3 text-sm text-muted"
-                    >
-                      <CheckCircle2
-                        size={14}
-                        className="text-accent flex-shrink-0 mt-0.5"
-                      />
-                      {resp}
-                    </motion.li>
-                  ))}
-                </ul>
-              </div>
-            </motion.div>
+                  <dl className="mt-6 grid gap-3 sm:grid-cols-3">
+                    {item.stats.map((stat) => (
+                      <div
+                        key={stat.value}
+                        className="flex flex-col-reverse rounded-xl border border-line bg-surface-raised/60 px-4 py-3"
+                      >
+                        <dt className="mt-0.5 text-sm text-body">{stat.label}</dt>
+                        <dd className="font-heading text-2xl font-bold text-fg">{stat.value}</dd>
+                      </div>
+                    ))}
+                  </dl>
+
+                  <ul className="mt-6 flex flex-col gap-2.5">
+                    {item.bullets.map((bullet) => (
+                      <li key={bullet} className="flex gap-3 text-[0.9375rem] leading-relaxed text-body">
+                        <span aria-hidden className="mt-2.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
+                        <span>{emphasise(bullet, item.stats.map((s) => s.value))}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <ul aria-label="Technologies" className="mt-6 flex flex-wrap gap-2 border-t border-line pt-5">
+                    {item.tech.map((t) => (
+                      <li key={t} className="chip">
+                        {t}
+                      </li>
+                    ))}
+                  </ul>
+                </article>
+              </Reveal>
+            </li>
           ))}
-        </div>
+        </ol>
       </div>
     </section>
   );
